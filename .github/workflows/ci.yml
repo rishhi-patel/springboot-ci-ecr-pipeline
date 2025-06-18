@@ -1,4 +1,4 @@
-name: Spring Boot CI/CD with ECR
+name: Spring Boot CI/CD with AWS ECR
 
 on:
   push:
@@ -44,10 +44,12 @@ jobs:
       - name: 🧹 Lint with Checkstyle
         run: mvn checkstyle:check || true
 
-      - name: Debug AWS credentials (remove after testing)
-        run: |
-          echo "AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}"
-          echo "AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      - name: 🔐 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: 🔐 Log in to AWS ECR
         uses: aws-actions/amazon-ecr-login@v1
@@ -56,9 +58,9 @@ jobs:
         run: |
           IMAGE_TAG=$( [[ "${{ github.ref }}" == "refs/heads/main" ]] && echo "latest" || echo "dev" )
           docker build -t ${{ env.IMAGE_NAME }}:$IMAGE_TAG ./workflow
-          docker tag ${{ env.IMAGE_NAME }}:$IMAGE_TAG 857736875915.dkr.ecr.ca-central-1.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+          docker tag ${{ env.IMAGE_NAME }}:$IMAGE_TAG 857736875915.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
 
       - name: 📤 Push Docker Image to AWS ECR
         run: |
           IMAGE_TAG=$( [[ "${{ github.ref }}" == "refs/heads/main" ]] && echo "latest" || echo "dev" )
-          docker push 857736875915.dkr.ecr.ca-central-1.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+          docker push 857736875915.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
