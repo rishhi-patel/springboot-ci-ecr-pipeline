@@ -57,7 +57,7 @@ jobs:
       - name: 🐳 Build Docker Image
         run: |
           IMAGE_TAG=$( [[ "${{ github.ref }}" == "refs/heads/main" ]] && echo "latest" || echo "dev" )
-          docker build -t ${{ env.IMAGE_NAME }}:$IMAGE_TAG ./workflow
+          docker build -t ${{ env.IMAGE_NAME }}:$IMAGE_TAG .
           docker tag ${{ env.IMAGE_NAME }}:$IMAGE_TAG 857736875915.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
 
       - name: 📤 Push Docker Image to AWS ECR
