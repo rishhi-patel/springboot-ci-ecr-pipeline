@@ -11,9 +11,8 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-test-lint-deploy:
+  build-and-test:
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: workflow
@@ -43,6 +42,17 @@ jobs:
 
       - name: 🧹 Lint with Checkstyle
         run: mvn checkstyle:check || true
+
+  deploy-to-ecr:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workflow
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
 
       - name: 🔐 Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
