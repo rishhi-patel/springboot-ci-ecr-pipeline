@@ -43,16 +43,25 @@ jobs:
       - name: 🧹 Lint with Checkstyle
         run: mvn checkstyle:check || true
 
+      - name: 📦 Upload JAR Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-jar
+          path: workflow/target/*.jar
+
   deploy-to-ecr:
     needs: build-and-test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: workflow
 
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v3
+
+      - name: 📥 Download JAR Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: app-jar
+          path: workflow/target
 
       - name: 🔐 Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -65,6 +74,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: 🐳 Build Docker Image
+        working-directory: workflow
         run: |
           IMAGE_TAG=$( [[ "${{ github.ref }}" == "refs/heads/main" ]] && echo "latest" || echo "dev" )
           docker build -t ${{ env.IMAGE_NAME }}:$IMAGE_TAG .
