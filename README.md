@@ -98,6 +98,28 @@ Visit: [http://localhost:8080/hello](http://localhost:8080/hello)
 
 ---
 
+## 🚢 ECS Deployment with Load Balancer
+
+The application is deployed to Amazon ECS (Fargate) and exposed via an Application Load Balancer (ALB).
+
+Service Status Public URL : [Spring Boot API ✅](http://sp-alb-368462775.ca-central-1.elb.amazonaws.com/status)
+
+📌 ALB Setup Highlights
+• ALB Listener: HTTP (Port 80)
+• Target Group: Routes to ECS task running on Port 8080
+• ECS Task Definition: Uses Docker image from ECR (springboot-ci-app:latest)
+• Security Group: Allows inbound traffic on port 80
+• Subnet: Deployed in public subnets for accessibility
+
+🛡️ Health Check Endpoint
+
+The ALB health checks use the /status endpoint to verify the container’s availability:
+
+GET /status
+Response: "App is running"
+
+---
+
 ## ✅ How to Trigger Deployments
 
 | Action                      | Result                         |
@@ -116,16 +138,13 @@ Visit: [http://localhost:8080/hello](http://localhost:8080/hello)
 
 ![image](https://github.com/user-attachments/assets/395a7e2b-5951-440c-a0f3-e4a578d04be6)
 
-
 - ✅ Artifact download & Docker push logs
 
 ![image](https://github.com/user-attachments/assets/380c89e9-6c4e-4f9e-b49d-4066e8e1b7f9)
 
-
 - ✅ Success status for multi-job pipeline
 
 ![image](https://github.com/user-attachments/assets/c842bb56-3846-4645-979d-2307cfdf5b17)
-
 
 ---
 
@@ -143,4 +162,3 @@ Visit: [http://localhost:8080/hello](http://localhost:8080/hello)
 - GitHub: [@rishhi-patel](https://github.com/rishhi-patel)
 - Student ID: `8972657`
 - Course: `PROG8860 – CI/CD – Mid-Term Practical`
-
