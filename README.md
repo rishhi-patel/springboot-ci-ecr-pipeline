@@ -111,8 +111,21 @@ Visit: [http://localhost:8080/hello](http://localhost:8080/hello)
 ## 📸 Screenshots
 
 - ✅ CI build & deploy workflow (GitHub Actions)
+
+![image](https://github.com/user-attachments/assets/b6a031a5-13e9-4903-a70a-b39a220fc256)
+
+![image](https://github.com/user-attachments/assets/395a7e2b-5951-440c-a0f3-e4a578d04be6)
+
+
 - ✅ Artifact download & Docker push logs
+
+![image](https://github.com/user-attachments/assets/380c89e9-6c4e-4f9e-b49d-4066e8e1b7f9)
+
+
 - ✅ Success status for multi-job pipeline
+
+![image](https://github.com/user-attachments/assets/c842bb56-3846-4645-979d-2307cfdf5b17)
+
 
 ---
 
@@ -126,15 +139,8 @@ Visit: [http://localhost:8080/hello](http://localhost:8080/hello)
 
 ## 📬 Author
 
-**Rishikumar Patel**
-GitHub: [@rishhi-patel](https://github.com/rishhi-patel)
-Student ID: `8972657`
-Course: `PROG8860 – CI/CD – Mid-Term Practical`
+- **Rishikumar Patel**
+- GitHub: [@rishhi-patel](https://github.com/rishhi-patel)
+- Student ID: `8972657`
+- Course: `PROG8860 – CI/CD – Mid-Term Practical`
 
----
-
-## 📎 Submission
-
-- ✅ GitHub Repo: [https://github.com/rishhi-patel/springboot-ci-ecr-pipeline](https://github.com/rishhi-patel/springboot-ci-ecr-pipeline)
-- ✅ All pipeline criteria met
-- ✅ Multi-environment deployment to AWS ECR
