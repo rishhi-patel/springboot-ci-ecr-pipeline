@@ -104,12 +104,12 @@ The application is deployed to Amazon ECS (Fargate) and exposed via an Applicati
 
 Service Status Public URL : [Spring Boot API ✅](http://sp-alb-368462775.ca-central-1.elb.amazonaws.com/status)
 
-📌 ALB Setup Highlights
-• ALB Listener: HTTP (Port 80)
-• Target Group: Routes to ECS task running on Port 8080
-• ECS Task Definition: Uses Docker image from ECR (springboot-ci-app:latest)
-• Security Group: Allows inbound traffic on port 80
-• Subnet: Deployed in public subnets for accessibility
+### 📌 ALB Setup Highlights :
+- ALB Listener: HTTP (Port 80)
+- Target Group: Routes to ECS task running on Port 8080
+- ECS Task Definition: Uses Docker image from ECR (springboot-ci-app:latest)
+- Security Group: Allows inbound traffic on port 80
+- Subnet: Deployed in public subnets for accessibility
 
 🛡️ Health Check Endpoint
 
