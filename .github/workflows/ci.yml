@@ -84,3 +84,12 @@ jobs:
         run: |
           IMAGE_TAG=$( [[ "${{ github.ref }}" == "refs/heads/main" ]] && echo "latest" || echo "dev" )
           docker push 857736875915.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+
+      - name: 🚀 Deploy to ECS
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws ecs update-service \
+            --cluster springboot-cluster \
+            --service springboot-service \
+            --force-new-deployment \
+            --region ca-central-1
