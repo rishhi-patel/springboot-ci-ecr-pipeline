@@ -1,44 +1,86 @@
-deploy-to-ecr:
-  needs: build-and-test
-  runs-on: ubuntu-latest
+name: Spring Boot CI/CD with AWS ECR
 
-  steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v3
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
 
-    - name: 📥 Download JAR Artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: app-jar
-        path: workflow/target
+env:
+  AWS_REGION: ca-central-1
+  ECR_REPOSITORY: springboot-ci-app
+  IMAGE_NAME: ${{ github.repository }}
 
-    - name: 🔐 Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ca-central-1
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workflow
 
-    - name: 🔐 Log in to AWS ECR
-      uses: aws-actions/amazon-ecr-login@v1
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
 
-    - name: 🐳 Build Docker Image
-      working-directory: workflow
-      run: |
-        IMAGE_TAG=$( [[ "${{ github.ref }}" == "refs/heads/main" ]] && echo "latest" || echo "dev" )
-        docker build -t ${{ env.IMAGE_NAME }}:$IMAGE_TAG .
-        docker tag ${{ env.IMAGE_NAME }}:$IMAGE_TAG 857736875915.dkr.ecr.ca-central-1.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+      - name: ☕ Set up Java 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: "21"
+          distribution: "temurin"
 
-    - name: 📤 Push Docker Image to AWS ECR
-      run: |
-        IMAGE_TAG=$( [[ "${{ github.ref }}" == "refs/heads/main" ]] && echo "latest" || echo "dev" )
-        docker push 857736875915.dkr.ecr.ca-central-1.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+      - name: 📦 Cache Maven Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-    - name: 🚀 Deploy to ECS
-      if: github.ref == 'refs/heads/main'
-      run: |
-        aws ecs update-service \
-          --cluster springboot-cluster \
-          --service springboot-service \
-          --force-new-deployment \
-          --region ca-central-1
+      - name: 🛠️ Build with Maven
+        run: mvn clean package
+
+      - name: ✅ Run Unit Tests
+        run: mvn test
+
+      - name: 🧹 Lint with Checkstyle
+        run: mvn checkstyle:check || true
+
+      - name: 📦 Upload JAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: workflow/target/*.jar
+
+  deploy-to-ecr:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 📥 Download JAR Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: workflow/target
+
+      - name: 🔐 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🔐 Log in to AWS ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: 🐳 Build Docker Image
+        working-directory: workflow
+        run: |
+          IMAGE_TAG=$( [[ "${{ github.ref }}" == "refs/heads/main" ]] && echo "latest" || echo "dev" )
+          docker build -t ${{ env.IMAGE_NAME }}:$IMAGE_TAG .
+          docker tag ${{ env.IMAGE_NAME }}:$IMAGE_TAG 857736875915.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+
+      - name: 📤 Push Docker Image to AWS ECR
+        run: |
+          IMAGE_TAG=$( [[ "${{ github.ref }}" == "refs/heads/main" ]] && echo "latest" || echo "dev" )
+          docker push 857736875915.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
